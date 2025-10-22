@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 
-const PostCommentSchema = new mongoose.Schema(
+const PostLikeSchema = new mongoose.Schema(
   {
     _id: { type: String, default: nanoid() },
-    text: { type: String },
 
     post: { type: String, ref: "Post" },
     createdBy: { type: String, ref: "User" },
@@ -15,4 +14,4 @@ const PostCommentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const PostCommentModel = mongoose.model("PostComment", PostCommentSchema);
+export const PostLikeModel = mongoose.model("PostLike", PostLikeSchema);
