@@ -2,6 +2,7 @@ import express from "express";
 import { PostModel } from "../models/post.model.mjs";
 import { PostCommentModel } from "../models/post-comment.model.mjs";
 import { PostLikeModel } from "../models/post-like.model.mjs";
+import { PostShareModel } from "../models/post-share.model.mjs";
 import { nanoid } from "nanoid";
 import { authMiddleware } from "../middlewares/auth.middleware.mjs";
 
@@ -22,6 +23,14 @@ router.get("/", async (req, res) => {
     },
     {
       path: "likes",
+      options: { strictPopulate: false },
+      populate: {
+        path: "createdBy",
+        model: "User",
+      },
+    },
+    {
+      path: "shares",
       options: { strictPopulate: false },
       populate: {
         path: "createdBy",
@@ -57,7 +66,7 @@ router.post("/", authMiddleware, async (req, res) => {
     _id: nanoid(),
     description,
     imageUrl,
-    createdBy: req.req.user._id,
+    createdBy: req.user._id,
   });
   return res.send({ message: "Post created successfully", body: post });
 });
@@ -152,5 +161,30 @@ router.post("/:postId/like", authMiddleware, async (req, res) => {
     .status(200)
     .send({ message: "Амжилттай лайкаа буцаалаа", isLiked: false });
 });
+
+router.post("/:postId/share", authMiddleware, async (req, res) => {
+  const postId = req.params.postId;
+
+  const post = await PostModel.findById(postId);
+  if (!post) return res.status(404).send({ message: "Post not found!" });
+
+  const existingShare = await PostShareModel.findOne({
+    post: postId,
+    createdBy: req.user._id,
+  });
+
+  if (!existingShare) {
+    await PostShareModel.create({
+      _id: nanoid(),
+      post: postId,
+      createdBy: req.user._id,
+    });
+    return res.status(200).send({ message: "Shared successfully", isShared: true });
+  }
+
+  await PostShareModel.findByIdAndDelete(existingShare._id);
+  return res.status(200).send({ message: "Share removed", isShared: false });
+});
+
 
 export default router;
