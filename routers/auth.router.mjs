@@ -95,10 +95,6 @@ router.post("/signin", async (req, res) => {
     return res.status(400).send({ message: "Password required" });
   }
 
-  // const user = users.find((item) => {
-  //   return item.email === body.credential || item.phone === body.credential || item.username === body.credential;
-  // });
-
   const user = await UserModel.findOne({ $or: [{ email: body.credential }, { phone: body.credential }, { username: body.credential }] });
 
   if (!user) {

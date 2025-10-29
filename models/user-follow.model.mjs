@@ -5,8 +5,8 @@ const UserFollowSchema = new mongoose.Schema(
   {
     _id: { type: String, default: nanoid() },
 
-    user: { type: String, ref: "User" }, // WHOM
-    createdBy: { type: String, ref: "User" }, // WHO
+    user: { type: String, ref: "User" },
+    createdBy: { type: String, ref: "User" },
 
     createdAt: { type: Date },
     updatedAt: { type: Date },
