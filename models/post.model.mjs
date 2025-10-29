@@ -31,6 +31,12 @@ PostSchema.virtual("shares", {
   foreignField: "post",
 });
 
+PostSchema.virtual("saves", {
+  ref: "PostSave",
+  localField: "_id",
+  foreignField: "post",
+});
+
 PostSchema.set("toObject", { virtuals: true });
 PostSchema.set("toJSON", { virtuals: true });
 

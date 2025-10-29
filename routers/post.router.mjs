@@ -3,6 +3,7 @@ import { PostModel } from "../models/post.model.mjs";
 import { PostCommentModel } from "../models/post-comment.model.mjs";
 import { PostLikeModel } from "../models/post-like.model.mjs";
 import { PostShareModel } from "../models/post-share.model.mjs";
+import { PostSaveModel } from "../models/post-save.model.mjs";
 import { nanoid } from "nanoid";
 import { authMiddleware } from "../middlewares/auth.middleware.mjs";
 import { UserModel } from "../models/user.model.mjs";
@@ -32,6 +33,14 @@ router.get("/", async (req, res) => {
     },
     {
       path: "shares",
+      options: { strictPopulate: false },
+      populate: {
+        path: "createdBy",
+        model: "User",
+      },
+    },
+    {
+      path: "saves",
       options: { strictPopulate: false },
       populate: {
         path: "createdBy",
@@ -187,18 +196,39 @@ router.post("/:postId/share", authMiddleware, async (req, res) => {
   return res.status(200).send({ message: "Share removed", isShared: false });
 });
 
-// Get posts of a specific user by username
+router.post("/:postId/save", authMiddleware, async (req, res) => {
+  const postId = req.params.postId;
+
+  const post = await PostModel.findById(postId);
+  if (!post) return res.status(404).send({ message: "Post not found!" });
+
+  const existingSave = await PostSaveModel.findOne({
+    post: postId,
+    createdBy: req.user._id,
+  });
+
+  if (!existingSave) {
+    await PostSaveModel.create({
+      _id: nanoid(),
+      post: postId,
+      createdBy: req.user._id,
+    });
+    return res.status(200).send({ message: "Saved successfully", isSaved: true });
+  }
+
+  await PostSaveModel.findByIdAndDelete(existingSave._id);
+  return res.status(200).send({ message: "Save removed", isSaved: false });
+});
+
 router.get("/user/:username", async (req, res) => {
   try {
     const { username } = req.params;
 
-    // find the user by username
     const user = await UserModel.findOne({ username });
     if (!user) {
       return res.status(404).send({ message: "User not found!" });
     }
 
-    // find posts created by that user
     const posts = await PostModel.find({ createdBy: user._id })
       .populate([
         {
@@ -217,6 +247,11 @@ router.get("/user/:username", async (req, res) => {
         },
         {
           path: "shares",
+          options: { strictPopulate: false },
+          populate: { path: "createdBy", model: "User" },
+        },
+        {
+          path: "saves",
           options: { strictPopulate: false },
           populate: { path: "createdBy", model: "User" },
         },
