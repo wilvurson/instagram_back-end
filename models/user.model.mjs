@@ -15,10 +15,26 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// 🟢 User posts
 UserSchema.virtual("posts", {
   ref: "Post",
   localField: "_id",
   foreignField: "createdBy",
+});
+
+// 🟢 User followers (who follows this user)
+UserSchema.virtual("followers", {
+  ref: "UserFollow",
+  localField: "_id",
+  foreignField: "user", // WHOM
+});
+
+// 🟢 User followings (who this user follows)
+UserSchema.virtual("followings", {
+  ref: "UserFollow",
+  localField: "_id",
+  foreignField: "createdBy", // WHO
 });
 
 UserSchema.set("toObject", { virtuals: true });

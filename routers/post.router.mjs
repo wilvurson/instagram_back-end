@@ -5,6 +5,7 @@ import { PostLikeModel } from "../models/post-like.model.mjs";
 import { PostShareModel } from "../models/post-share.model.mjs";
 import { nanoid } from "nanoid";
 import { authMiddleware } from "../middlewares/auth.middleware.mjs";
+import { UserModel } from "../models/user.model.mjs";
 
 const router = express.Router();
 
@@ -185,6 +186,50 @@ router.post("/:postId/share", authMiddleware, async (req, res) => {
   await PostShareModel.findByIdAndDelete(existingShare._id);
   return res.status(200).send({ message: "Share removed", isShared: false });
 });
+
+// Get posts of a specific user by username
+router.get("/user/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // find the user by username
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      return res.status(404).send({ message: "User not found!" });
+    }
+
+    // find posts created by that user
+    const posts = await PostModel.find({ createdBy: user._id })
+      .populate([
+        {
+          path: "createdBy",
+          model: "User",
+        },
+        {
+          path: "comments",
+          options: { strictPopulate: false },
+          populate: { path: "createdBy", model: "User" },
+        },
+        {
+          path: "likes",
+          options: { strictPopulate: false },
+          populate: { path: "createdBy", model: "User" },
+        },
+        {
+          path: "shares",
+          options: { strictPopulate: false },
+          populate: { path: "createdBy", model: "User" },
+        },
+      ])
+      .sort({ createdAt: -1 });
+
+    res.status(200).send(posts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ message: "Failed to fetch user's posts" });
+  }
+});
+
 
 
 export default router;
