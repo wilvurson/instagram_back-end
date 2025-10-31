@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   const users = await UserModel.find().select(
-    "_id username fullname createdAt"
+    "_id username fullname profilePicture createdAt"
   );
   return res.status(200).send(users);
 });

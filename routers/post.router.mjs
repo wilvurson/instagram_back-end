@@ -140,6 +140,20 @@ router.post("/:postId/comments", authMiddleware, async (req, res) => {
   return res.status(200).send(newComment);
 });
 
+router.delete("/:postId/comments/:commentId", authMiddleware, async (req, res) => {
+  const { postId, commentId } = req.params;
+
+  const comment = await PostCommentModel.findById(commentId);
+  if (!comment) return res.status(404).send({ message: "Comment not found!" });
+
+  if (comment.createdBy.toString() !== req.user._id) {
+    return res.status(403).send({ message: "You can only delete your own comment!" });
+  }
+
+  await PostCommentModel.findByIdAndDelete(commentId);
+  return res.status(200).send({ message: "Comment deleted successfully", commentId });
+});
+
 router.post("/:postId/like", authMiddleware, async (req, res) => {
   const postId = req.params.postId;
 
