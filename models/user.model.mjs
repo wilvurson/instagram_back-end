@@ -9,7 +9,8 @@ const UserSchema = new mongoose.Schema(
     email: { type: String },
     password: { type: String, required: true },
     phone: { type: String },
-
+    profilePicture: { type: String, default: "/default-avatar.png" },
+    bio: { type: String, default: "" },
     createdAt: { type: Date },
     updatedAt: { type: Date },
   },
@@ -21,7 +22,6 @@ UserSchema.virtual("posts", {
   localField: "_id",
   foreignField: "createdBy",
 });
-
 
 UserSchema.virtual("followers", {
   ref: "UserFollow",

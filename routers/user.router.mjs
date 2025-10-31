@@ -13,35 +13,27 @@ router.get("/", async (req, res) => {
 
 router.get("/:username", async (req, res) => {
   const username = req.params.username;
-  if (!username) {
-    return res.status(400).send({ message: "Username must be present" });
-  }
+  if (!username) return res.status(400).send({ message: "Username required" });
 
   const user = await UserModel.findOne({ username })
-    .select("_id username fullname createdAt bio")
+    .select("_id username fullname bio profilePicture createdAt")
     .populate({
       path: "followers",
       populate: { path: "createdBy", select: "_id username fullname" },
     })
     .populate({
       path: "followings",
-      populate: { path: "user", select: "_id username fullname" },
+      populate: { path: "createdBy", select: "_id username fullname" },
     });
 
-  if (!user) {
-    return res.status(404).send({ message: `User with ${username} not found!` });
-  }
-
+  if (!user) return res.status(404).send({ message: "User not found" });
   return res.status(200).send(user);
 });
 
 router.post("/:username/follow", authMiddleware, async (req, res) => {
   const username = req.params.username;
-
   const targetUser = await UserModel.findOne({ username });
-  if (!targetUser) {
-    return res.status(404).send({ message: "User not found!" });
-  }
+  if (!targetUser) return res.status(404).send({ message: "User not found" });
 
   const existingFollow = await UserFollowModel.findOne({
     user: targetUser._id,
@@ -54,16 +46,22 @@ router.post("/:username/follow", authMiddleware, async (req, res) => {
       user: targetUser._id,
       createdBy: req.user._id,
     });
-
-    return res
-      .status(200)
-      .send({ message: "Followed successfully", isFollowing: true });
+    return res.status(200).send({ isFollowing: true });
   }
 
   await UserFollowModel.findByIdAndDelete(existingFollow._id);
-  return res
-    .status(200)
-    .send({ message: "Unfollowed successfully", isFollowing: false });
+  return res.status(200).send({ isFollowing: false });
+});
+
+router.patch("/me", authMiddleware, async (req, res) => {
+  const { fullname, bio, profilePicture } = req.body;
+  const updates = { fullname, bio, profilePicture };
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    req.user._id,
+    updates,
+    { new: true }
+  );
+  return res.status(200).send(updatedUser);
 });
 
 export default router;
