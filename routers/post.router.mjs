@@ -144,10 +144,7 @@ router.post("/:postId/like", authMiddleware, async (req, res) => {
   const postId = req.params.postId;
 
   const post = await PostModel.findById(postId);
-  if (!post) {
-    return res.status(404).send({ message: "Post not found!" });
-  }
-  console.log({ postId, userId: req.user._id });
+  if (!post) return res.status(404).send({ message: "Post not found!" });
 
   const existingLike = await PostLikeModel.findOne({
     post: postId,
@@ -160,16 +157,11 @@ router.post("/:postId/like", authMiddleware, async (req, res) => {
       post: postId,
       createdBy: req.user._id,
     });
-
-    return res
-      .status(200)
-      .send({ message: "Амжилттай лайк дарлаа", isLiked: true });
+    return res.status(200).send({ message: "Liked successfully", isLiked: true });
   }
 
-  await PostLikeModel.findOneAndDelete(existingLike._id);
-  return res
-    .status(200)
-    .send({ message: "Амжилттай лайкаа буцаалаа", isLiked: false });
+  await PostLikeModel.findByIdAndDelete(existingLike._id);
+  return res.status(200).send({ message: "Like removed", isLiked: false });
 });
 
 router.post("/:postId/share", authMiddleware, async (req, res) => {

@@ -7,7 +7,9 @@ import { nanoid } from "nanoid";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const users = await UserModel.find().select("_id username fullname createdAt");
+  const users = await UserModel.find().select(
+    "_id username fullname createdAt"
+  );
   return res.status(200).send(users);
 });
 
@@ -54,13 +56,11 @@ router.post("/:username/follow", authMiddleware, async (req, res) => {
 });
 
 router.patch("/me", authMiddleware, async (req, res) => {
-  const { fullname, bio, profilePicture } = req.body;
-  const updates = { fullname, bio, profilePicture };
-  const updatedUser = await UserModel.findByIdAndUpdate(
-    req.user._id,
-    updates,
-    { new: true }
-  );
+  const { username, fullname, bio, profilePicture } = req.body;
+  const updates = { username, fullname, bio, profilePicture };
+  const updatedUser = await UserModel.findByIdAndUpdate(req.user._id, updates, {
+    new: true,
+  });
   return res.status(200).send(updatedUser);
 });
 
