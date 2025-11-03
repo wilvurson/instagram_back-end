@@ -1,5 +1,4 @@
 import express from "express";
-
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -15,28 +14,30 @@ const PORT = 5500;
 
 const app = express();
 
+// Middleware
 app.use(express.json());
-
 app.use(cors());
 
+// Test route
 app.get("/", (req, res) => {
-  res.send("Hi server");
-  return (
-    <div className="w-full h-full flex">
-      <div>
-        SERVER IS ON
-      </div>
-    </div>
-  )
+  res.send("Server is running"); // <-- plain text, not JSX
 });
 
+// Routers
 app.use("/posts", PostRouter);
 app.use("/users", UserRouter);
 app.use("/api/public-messages", publicMessagesRouter);
-
 app.use(AuthRouter);
 
-app.listen(PORT, () => {
-  mongoose.connect(process.env.MONGO_URL);
-  console.log(`Your app is running on http://localhost:${PORT}`);
-});
+// Connect to MongoDB and start server
+mongoose
+  .connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("MongoDB connected");
+    app.listen(PORT, () => {
+      console.log(`Your app is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+  });
