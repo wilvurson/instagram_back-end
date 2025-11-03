@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import PostRouter from "./routers/post.router.mjs";
 import AuthRouter from "./routers/auth.router.mjs";
 import UserRouter from "./routers/user.router.mjs";
+import publicMessagesRouter from "./routes/public-messages.routes.mjs";
 
 dotenv.config();
 
@@ -20,10 +21,18 @@ app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("Hi server");
+  return (
+    <div className="w-full h-full flex">
+      <div>
+        SERVER IS ON
+      </div>
+    </div>
+  )
 });
 
 app.use("/posts", PostRouter);
 app.use("/users", UserRouter);
+app.use("/api/public-messages", publicMessagesRouter);
 
 app.use(AuthRouter);
 
