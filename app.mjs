@@ -5,6 +5,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import PostRouter from "./routers/post.router.mjs";
+import MessageRouter from "./routers/message.router.mjs";
 import AuthRouter from "./routers/auth.router.mjs";
 import UserRouter from "./routers/user.router.mjs";
 
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/posts", PostRouter);
+app.use("/messages", MessageRouter);
 app.use("/users", UserRouter);
 
 app.use(AuthRouter);
