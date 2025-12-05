@@ -10,7 +10,9 @@ import UserRouter from "./routers/user.router.mjs";
 
 dotenv.config();
 
-const PORT = 5500;
+const PORT = process.env.PORT || 5500;
+
+mongoose.connect(process.env.MONGO_URL);
 
 const app = express();
 
@@ -27,7 +29,10 @@ app.use("/users", UserRouter);
 
 app.use(AuthRouter);
 
-app.listen(PORT, () => {
-  mongoose.connect(process.env.MONGO_URL);
-  console.log(`Your app is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Your app is running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;

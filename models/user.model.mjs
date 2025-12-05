@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema(
     email: { type: String },
     password: { type: String, required: true },
     phone: { type: String },
-    profilePicture: { type: String, default: "/default-avatar.png" },
+    profilePicture: { type: String, default: null },
     bio: { type: String, default: "" },
     createdAt: { type: Date },
     updatedAt: { type: Date },
